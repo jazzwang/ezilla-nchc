@@ -30,6 +30,8 @@ chown oneadmin:cloud /var/lib/one/.one/one_auth
 cp -p /var/lib/one/.ssh/id_rsa.pub /var/lib/one/.ssh/authorized_keys
 ### add services to DRBL Server
 update-rc.d opennebula defaults
+## Setup sysrqd
+echo "opennebula" > /etc/sysrqd.secret && chmod 0600 /etc/sysrqd.secret
 ## Setup DRBL
 echo "deb http://free.nchc.org.tw/drbl-core drbl stable" > /etc/apt/sources.list.d/drbl.list
 wget -q http://drbl.nchc.org.tw/GPG-KEY-DRBL -O- | apt-key add -

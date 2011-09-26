@@ -272,8 +272,13 @@ case "$switch" in
 
      # Add libvirt-bin service to all DRBL client
      drbl-client-service libvirt-bin on
+     # Add sysrqd service to all DRBL client
+     drbl-client-service sysrqd on
      # setup /etc/modules for all DRBL client
      drbl-cp-host /etc/modules /etc/modules
+     # setup /etc/groups for all DRBL client
+     # this will ensure user 'one' in 'sudo' group
+     drbl-cp-host /etc/group /etc/group
 
      # Add DRBL client to onehost
      # Note: it does not work well and show STATE as err 
