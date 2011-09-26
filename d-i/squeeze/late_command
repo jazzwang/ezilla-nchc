@@ -54,6 +54,7 @@ wget -q http://astro.nchc.org.tw/d-i/squeeze/ezilla.tar.gz -O /root/ezilla.tar.g
 wget -q http://astro.nchc.org.tw/d-i/squeeze/onescript.tar.gz -O /root/onescript.tar.gz
 wget -q http://astro.nchc.org.tw/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
 wget -q http://astro.nchc.org.tw/d-i/squeeze/config.tar.gz -O /root/config.tar.gz
+wget -q http://astro.nchc.org.tw/d-i/squeeze/initrd_bin.tar.gz -O /root/initrd_bin.tar.gz
 # wget -q http://astro.nchc.org.tw/d-i/squeeze/interfaces -O /etc/network/interfaces
 cat >> /etc/network/interfaces << EOF
 ## setup eth0:1 as ethernet alias
@@ -62,20 +63,18 @@ iface eth0:1 inet static
 address 10.0.0.254
 netmask 255.0.0.0
 EOF
+mkdir -p /var/lib/one/tmp
 tar zxvf /root/ezilla.tar.gz -C /var/www/
 tar zxvf /root/onescript.tar.gz -C /srv/
 tar zxvf /root/redir.tar.gz -C /opt/
 tar zxvf /root/config.tar.gz -C /root/
-mv /root/config/*.one /tmp
-chown oneadmin:cloud /tmp/*.one
-su oneadmin -s /bin/bash -c "/usr/bin/onevnet create /tmp/vnet.one &> /tmp/vnet.log"
-su oneadmin -s /bin/bash -c "/usr/bin/oneimage create /tmp/image.one &> /tmp/image.log"
+tar zxvf /root/initrd_bin.tar.gz -C /root/
+tar zxvf /root/config.tar.gz -C /var/lib/one/tmp
 rm /root/ezilla.tar.gz
 rm /root/onescript.tar.gz
 rm /root/redir.tar.gz
 rm /root/config.tar.gz
-rm /tmp/vnet.one
-rm /tmp/image.one
+rm /root/initrd_bin.tar.gz
 rm /var/www/index.html
 mkdir -p /srv/one
 chown -R www-data:www-data /var/www/

@@ -285,9 +285,11 @@ case "$switch" in
      # Remove ezilla service
      update-rc.d -f ezilla remove
      # add Ezilla default network brdige and default booting procedure
-     cp /root/config/addbridge.sh /tftpboot/nodes/10.0.0.1/etc/addbridge.sh
-     cp /root/config/rc.local /tftpboot/nodes/10.0.0.1/etc/rc.local
-     /opt/drbl/sbin/drbl-gen-ssi-files -t 10.0.0.1
+     #cp /root/config/addbridge.sh /tftpboot/nodes/10.0.0.1/etc/addbridge.sh
+     #cp /root/config/rc.local /tftpboot/nodes/10.0.0.1/etc/rc.local
+     #/opt/drbl/sbin/drbl-gen-ssi-files -t 10.0.0.1
+     su oneadmin -s /bin/bash -c "/usr/bin/onevnet create /var/lib/one/tmp/config/vnet.one"
+     su oneadmin -s /bin/bash -c "/usr/bin/oneimage register /var/lib/one/tmp/config/image.one"
      ;;
    "stop")
      # block all the clients.
