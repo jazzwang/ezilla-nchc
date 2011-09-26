@@ -1,0 +1,88 @@
+#!/bin/bash
+## Setup SSH client Global variable
+echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+## Setup SSH private key for user 'one'
+su one -s /bin/bash -c "ssh-keygen -t rsa -f /home/one/.ssh/id_rsa -q -N \"\""
+### ssh-copy-host for user 'one'
+#### use -p to preserve permission : (X) root:root -> (O) one:one
+cp -p /home/one/.ssh/id_rsa.pub /home/one/.ssh/authorized_keys
+### add user 'one' to group 'cloud'
+adduser one cloud
+## Setup libvirt
+### add user 'one' to group 'libvirt'
+### Note: at http://wiki.libvirt.org/page/SSHSetup
+### they use "sudo usermod -G libvirt -a username1" to add user to group
+adduser one libvirt
+adduser libvirt-qemu libvirt
+### setup /var/run/libvirt folder
+mkdir -p /var/run/libvirt
+chown oneadmin:libvirt /var/run/libvirt
+chmod g+w /var/run/libvirt
+### configure libvirtd.conf
+echo "unix_sock_ro_perms = \"0777\"" >> /etc/libvirt/libvirtd.conf
+echo "unix_sock_dir = \"/var/run/libvirt\"" >> /etc/libvirt/libvirtd.conf
+## Setup OpenNebula
+### Configure ONE_AUTH
+echo "oneadmin:opennebulaadmin" > /var/lib/one/.one/one_auth
+chown oneadmin:cloud /var/lib/one/.one/one_auth
+### ssh-copy-host for user 'oneadmin'
+cp -p /var/lib/one/.ssh/id_rsa.pub /var/lib/one/.ssh/authorized_keys
+### add services to DRBL Server
+update-rc.d opennebula defaults
+## Setup DRBL
+echo "deb http://free.nchc.org.tw/drbl-core drbl stable" > /etc/apt/sources.list.d/drbl.list
+wget -q http://drbl.nchc.org.tw/GPG-KEY-DRBL -O- | apt-key add -
+apt-get update
+apt-get -y install drbl clonezilla mkswap-uuid partclone drbl-chntpw mkpxeinitrd-net gpxe freedos ipxe
+apt-get -y autoremove --purge vim-tiny nano
+## remove NIS service for the first time
+## since it's not yet configured
+update-rc.d -f nis remove
+## remove libvirt-bin service for the first time
+## since it's not yet configured and only needed by DRBL client
+update-rc.d -f libvirt-bin remove
+## remove DHCP and TFTP Server service for the first time 
+## since we will not need it and it's not yet configured
+update-rc.d -f isc-dhcp-server remove
+update-rc.d -f tftpd-hpa remove
+## disable exim4 and dbus service that we don't need now
+update-rc.d -f exim4 remove
+update-rc.d -f dbus remove
+## Setup initial procedure of Ezilla
+# hsing modify
+wget -q http://astro.nchc.org.tw/d-i/squeeze/ezilla.tar.gz -O /root/ezilla.tar.gz
+wget -q http://astro.nchc.org.tw/d-i/squeeze/onescript.tar.gz -O /root/onescript.tar.gz
+wget -q http://astro.nchc.org.tw/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
+wget -q http://astro.nchc.org.tw/d-i/squeeze/config.tar.gz -O /root/config.tar.gz
+# wget -q http://astro.nchc.org.tw/d-i/squeeze/interfaces -O /etc/network/interfaces
+cat >> /etc/network/interfaces << EOF
+## setup eth0:1 as ethernet alias
+auto eth0:1
+iface eth0:1 inet static
+address 10.0.0.254
+netmask 255.0.0.0
+EOF
+tar zxvf /root/ezilla.tar.gz -C /var/www/
+tar zxvf /root/onescript.tar.gz -C /srv/
+tar zxvf /root/redir.tar.gz -C /opt/
+tar zxvf /root/config.tar.gz -C /root/
+mv /root/config/*.one /tmp
+chown oneadmin:cloud /tmp/*.one
+su oneadmin -s /bin/bash -c "/usr/bin/onevnet create /tmp/vnet.one &> /tmp/vnet.log"
+su oneadmin -s /bin/bash -c "/usr/bin/oneimage create /tmp/image.one &> /tmp/image.log"
+rm /root/ezilla.tar.gz
+rm /root/onescript.tar.gz
+rm /root/redir.tar.gz
+rm /root/config.tar.gz
+rm /tmp/vnet.one
+rm /tmp/image.one
+rm /var/www/index.html
+mkdir -p /srv/one
+chown -R www-data:www-data /var/www/
+chown -R oneadmin:cloud /srv/one
+chmod a+x /tmp/addbridge.sh
+chmod a+x /tmp/rc.local
+## Setup initial procedure of DRBL
+wget -q http://ezilla-nchc.sf.net/d-i/squeeze/ezilla -O /etc/init.d/ezilla
+chmod a+x /etc/init.d/ezills
+update-rc.d ezilla defaults
