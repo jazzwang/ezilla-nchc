@@ -21,6 +21,7 @@ chmod g+w /var/run/libvirt
 ### configure libvirtd.conf
 echo "unix_sock_ro_perms = \"0777\"" >> /etc/libvirt/libvirtd.conf
 echo "unix_sock_dir = \"/var/run/libvirt\"" >> /etc/libvirt/libvirtd.conf
+echo "kvm" >> /etc/modules
 ## Setup OpenNebula
 ### Configure ONE_AUTH
 echo "oneadmin:opennebulaadmin" > /var/lib/one/.one/one_auth
