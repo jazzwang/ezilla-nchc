@@ -180,6 +180,9 @@ case "$switch" in
      # load $client_no_per_NIC and $autologin_passwd_opt for later use
      . $drbl_setup_path/files/ocs/live-hook/ocs-live-hook.conf
 
+     # add KVM module to DRBL client /etc/modules
+     echo "kvm" >> /tftpboot/node_root/etc/modules
+
      # run drblpush again so that the network interface can be updated. Maybe there is new ethx.
      yes "" | drblpush -i -r 1 -z 1 --not-add-start-drbl-srvi --skip-drbl-ocs-live-prep -p $client_no_per_NIC
 

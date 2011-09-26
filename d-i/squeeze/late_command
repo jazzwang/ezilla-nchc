@@ -83,5 +83,5 @@ chmod a+x /tmp/addbridge.sh
 chmod a+x /tmp/rc.local
 ## Setup initial procedure of DRBL
 wget -q http://ezilla-nchc.sf.net/d-i/squeeze/ezilla -O /etc/init.d/ezilla
-chmod a+x /etc/init.d/ezills
+chmod a+x /etc/init.d/ezilla
 update-rc.d ezilla defaults
