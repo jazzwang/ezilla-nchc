@@ -48,9 +48,8 @@ update-rc.d -f libvirt-bin remove
 ## since we will not need it and it's not yet configured
 update-rc.d -f isc-dhcp-server remove
 update-rc.d -f tftpd-hpa remove
-## disable exim4 and dbus service that we don't need now
+## disable exim4 service that we don't need now
 update-rc.d -f exim4 remove
-update-rc.d -f dbus remove
 ## Setup initial procedure of Ezilla
 # hsing modify
 wget -q http://astro.nchc.org.tw/d-i/squeeze/ezilla.tar.gz -O /root/ezilla.tar.gz
