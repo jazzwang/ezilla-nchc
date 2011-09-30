@@ -285,9 +285,9 @@ case "$switch" in
      #       while DRBL client boot after running this command
      #       Will put this to another runtime
 
-     # for ((i=1;i<=100;i++)); do
-     #  su oneadmin -s /bin/bash -c "onehost add 192.168.100.$i im_kvm vmm_kvm tm_ssh"
-     # done
+     for ((i=1;i<=100;i++)); do
+       su oneadmin -s /bin/bash -c "onehost add 10.0.0.$i im_kvm vmm_kvm tm_ssh"
+     done
 
      # Remove ezilla service
      update-rc.d -f ezilla remove
