@@ -158,7 +158,8 @@ echo "done!"
 create_dev
 
 # find my IP address
-NETDEVICES="$(cat /proc/net/dev | awk -F: '/eth.:|tr.:/{print $1}')"
+# modified by drbl-virt
+NETDEVICES="$(cat /proc/net/dev | awk -F: '/eth.:|tr.:|br.:/{print $1}')"
 for DEVICE in $NETDEVICES; do
   IP_tmp="$(ifconfig $DEVICE | grep -A1 $DEVICE | grep -v $DEVICE | grep "inet addr" | sed -e 's/^.*inet addr:\([0-9\.]\+\).*$/\1/')"
   if [ -n "$IP_tmp" ]; then

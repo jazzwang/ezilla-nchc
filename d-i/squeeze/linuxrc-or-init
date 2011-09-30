@@ -151,6 +151,12 @@ $echo "Bringing up loopback interface"
 ifconfig lo 127.0.0.1 up
 route add -net 127.0.0.0 netmask 255.0.0.0 lo
 
+# modified by drbl-virt
+brctl addbr br0
+brctl addif br0 eth0
+ifconfig eth0 0.0.0.0
+ifconfig br0 0.0.0.0
+
 # IF the netdevices is not assign in /etc/netdev.conf, we use get-nic-devs to detect the network devices and do dhcpc request each one
 if [ -z "$netdevices" ]; then
   netdevs="$(get-nic-devs)"

@@ -37,7 +37,8 @@ include_splash="yes"
 # uncompress the compress kernel module. This is special for Mandriva case. It uses compressed kernel module, e.g. pcnet32.ko.gz. Before we used modprobe from busybox, we have to uncompress that. Now the modprobe program is from the OS (See variable include_bin_prog_from_server), so we should allow this type of kernel modules.
 use_compressed_kernel_module="yes"
 # Some required bin programs to be included in the PXE initrd, which are not provided by busybox or the one provided by busybox does not support the function we want. E.g. sleep (we need "sleep 0.1", while sleep from busybox does not support 0.1 secs).
-include_bin_prog_from_server="sleep lspci insmod modprobe rmmod lsmod pkill strings mount umount mount.nfs umount.nfs"
+# modified by drbl-virt
+include_bin_prog_from_server="sleep lspci insmod modprobe rmmod lsmod pkill strings mount umount mount.nfs umount.nfs brctl"
 
 # No need to use sudo if we are root
 if [ $UID -eq 0 ]; then
@@ -302,6 +303,10 @@ elif [ -n "$(echo $kernel_ver | grep -E "(^2\.6\.|^3\.)")" ]; then
    for i in $net_mods; do
      cp -a --parents $i $initrd/lib/modules/$kernel_ver/
    done
+
+   # modified by drbl-virt
+   cp -a --parents kernel/net/802/stp.ko       $initrd/lib/modules/$kernel_ver/
+   cp -a --parents kernel/net/bridge/bridge.ko $initrd/lib/modules/$kernel_ver/
 
    # Deal with firmwares!
    # The following is borrowed from Debian's /usr/share/initramfs-tools/hook-functions
