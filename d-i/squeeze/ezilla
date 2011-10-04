@@ -118,6 +118,7 @@ fi
 
 case "$switch" in
    "start"|"restart")
+     su oneadmin -s /bin/bash -c "/bin/mkdir -p /var/tmp/one;/bin/cp -r /var/lib/one/remotes/* /var/tmp/one/"
      if [ "$prompt_drbl_live" = "yes" ]; then
        [ "$BOOTUP" = "color" ] && $SETCOLOR_WARNING
        echo "$msg_this_is_for_drbl_server_not_for_clonezilla_server_edition"
