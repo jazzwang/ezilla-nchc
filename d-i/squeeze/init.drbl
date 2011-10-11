@@ -279,6 +279,8 @@ if [ "$ssi_flag" = "1" ]; then
     # only DRBL SSI mode, not in clonezilla box mode, use NFS
     echo -n "Mounting NFS dir /opt... "
     do_nfs_mount $nfsserver:/opt /opt $RO_NFS_EXTRA_OPT $NFS_OPT_TO_ADD
+    echo -n "Mounting NFS dir /var/lib/one... "
+    do_nfs_mount $nfsserver:/var/lib/one /var/lib/one $RW_NFS_EXTRA_OPT $NFS_OPT_TO_ADD
     NFS_OPT_TO_ADD_FLAG=$((NFS_OPT_TO_ADD_FLAG + $?))
     # We need /var/lib/dpkg or /var/lib/rpm so that later in drbl-ssi-client-prepare, we can use dpkg or rpm to query package to get the GDM_CFG or KDE_CFG
     if [ -d /var/lib/dpkg ]; then
