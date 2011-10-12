@@ -104,6 +104,8 @@ tar zxvf /root/redir.tar.gz -C /opt/
 tar zxvf /root/config.tar.gz -C /root/
 tar zxvf /root/initrd_bin.tar.gz -C /root/
 tar zxvf /root/config.tar.gz -C /var/lib/one/tmp
+chmod a+x /var/lib/one/tmp/config/addhost.sh
+chmod a+x /var/lib/one/tmp/config/rc.local
 ### clean up temp files
 rm /root/ezilla.tar.gz
 rm /root/onescript.tar.gz
