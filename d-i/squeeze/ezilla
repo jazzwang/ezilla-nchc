@@ -291,57 +291,15 @@ case "$switch" in
      # this will ensure user 'one' in 'sudo' group
      drbl-cp-host /etc/group /etc/group
 
-     # Add DRBL client to onehost
-     # Note: it does not work well and show STATE as err 
-     #       while DRBL client boot after running this command
-     #       Will put this to another runtime
-
-     #for ((i=1;i<=100;i++)); do
-     #  su oneadmin -s /bin/bash -c "onehost add 10.0.0.$i im_kvm vmm_kvm tm_ssh"
-     #done
-
      # Remove ezilla service
      update-rc.d -f ezilla remove
-
-     ## Ezilla
-     # Adds a new machine to the one's host pool by client
-     rc_local="/tftpboot/nodes/10.0.0.1/etc/rc.local"
-sed -i 's/^exit 0//g' $rc_local
-cat >> $rc_local << EOF
-#Ezilla Modify
-IP=\`/sbin/ifconfig | awk -F'[ :]+' '/Bcast/{print \$4}' | grep '10.'\`
-su oneadmin -s /bin/bash -c "ssh 10.0.0.254 \"/var/lib/one/tmp/config/addhost.sh \$IP\""
-exit 0
-EOF
-     cd /tftpboot/nodes/10.0.0.1/etc/rc2.d
-     ln -s ../rc.local ./S99rc.local
-     cd /tftpboot/nodes/10.0.0.1/etc/rc3.d
-     ln -s ../rc.local ./S99rc.local
-     /opt/drbl/sbin/drbl-gen-ssi-files -t 10.0.0.1
 
      # Register default vnet and image
      su oneadmin -s /bin/bash -c "/usr/bin/onevnet create /var/lib/one/tmp/config/vnet.one"
      su oneadmin -s /bin/bash -c "/usr/bin/oneimage register /var/lib/one/tmp/config/image.one"
 
      # Setup NAT for VMs
-     touch /var/lock/subsys/local
-     echo 1 > /proc/sys/net/ipv4/ip_forward
      /sbin/iptables -t nat -A POSTROUTING -s 10.0.0.0/255.0.0.0 -o eth0  -j MASQUERADE
-
-     server_rc_local="/etc/rc.local"
-sed -i 's/^exit 0//g' $server_rc_local
-cat >> $server_rc_local << EOF
-#Ezilla Modify
-touch /var/lock/subsys/local
-echo 1 > /proc/sys/net/ipv4/ip_forward
-/sbin/iptables -t nat -A POSTROUTING -s 10.0.0.0/255.0.0.0 -o eth0  -j MASQUERADE
-exit 0
-EOF
-     cd /etc/rc2.d
-     ln -s ../rc.local ./S99rc.local
-     cd /etc/rc3.d
-     ln -s ../rc.local ./S99rc.local
-     ###
      ;;
    "stop")
      # block all the clients.
