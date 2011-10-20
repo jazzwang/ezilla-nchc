@@ -306,10 +306,8 @@ IP=\`/sbin/ifconfig | awk -F'[ :]+' '/Bcast/{print \$4}' | grep '10.'\`
 su oneadmin -s /bin/bash -c "ssh 10.0.0.254 \"/var/lib/one/tmp/config/addhost.sh \$IP\""
 exit 0
 EOF
-	 cd /tftpboot/nodes/10.0.0.1/etc/rc2.d
-	 ln -s ../rc.local ./S99rc.local
-	 cd /tftpboot/nodes/10.0.0.1/etc/rc3.d
-	 ln -s ../rc.local ./S99rc.local
+     # Add libvirt-bin service to all DRBL client
+     drbl-client-service rc.local on
 	 /opt/drbl/sbin/drbl-gen-ssi-files -t 10.0.0.1
 
      # Register default vnet and image
