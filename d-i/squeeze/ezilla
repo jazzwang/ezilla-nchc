@@ -316,6 +316,14 @@ EOF
 
      # Setup NAT for VMs
      /sbin/iptables -t nat -A POSTROUTING -s 10.0.0.0/255.0.0.0 -o eth0  -j MASQUERADE
+     server_rc_local="/etc/rc.local"
+	 sed -i 's/^exit 0//g' $server_rc_local
+	 cat >> $server_rc_local << EOF
+#Ezilla Modify
+/sbin/iptables -t nat -A POSTROUTING -s 10.0.0.0/255.0.0.0 -o eth0  -j MASQUERADE
+exit 0
+EOF
+	
      ;;
    "stop")
      # block all the clients.
