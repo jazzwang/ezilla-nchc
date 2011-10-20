@@ -1,6 +1,8 @@
 #!/bin/bash
 # Author: Steven Shiau <steven _at_ nchc org tw>
 #         Jazz Yao-Tsung Wang <jazz _at_ nchc org tw>
+#         Chang-Hsing Wu <hsing _at_ nchc narl org tw>
+#         Serena Yi-Lun Pan <serenapan _at_ nchc narl org tw>
 # License: GPL
 
 ### BEGIN INIT INFO
@@ -293,6 +295,22 @@ case "$switch" in
 
      # Remove ezilla service
      update-rc.d -f ezilla remove
+
+	 ## Ezilla
+	 # Adds a new machine to the one's host pool by client
+	 rc_local="/tftpboot/nodes/10.0.0.1/etc/rc.local"
+	 sed -i 's/^exit 0//g' $rc_local
+cat >> $rc_local << EOF
+#Ezilla Modify
+IP=\`/sbin/ifconfig | awk -F'[ :]+' '/Bcast/{print \$4}' | grep '10.'\`
+su oneadmin -s /bin/bash -c "ssh 10.0.0.254 \"/var/lib/one/tmp/config/addhost.sh \$IP\""
+exit 0
+EOF
+	 cd /tftpboot/nodes/10.0.0.1/etc/rc2.d
+	 ln -s ../rc.local ./S99rc.local
+	 cd /tftpboot/nodes/10.0.0.1/etc/rc3.d
+	 ln -s ../rc.local ./S99rc.local
+	 /opt/drbl/sbin/drbl-gen-ssi-files -t 10.0.0.1
 
      # Register default vnet and image
      su oneadmin -s /bin/bash -c "/usr/bin/onevnet create /var/lib/one/tmp/config/vnet.one"
