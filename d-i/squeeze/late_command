@@ -4,6 +4,7 @@
 ### add user 'one' to group 'libvirt'
 ### Note: at http://wiki.libvirt.org/page/SSHSetup
 ### they use "sudo usermod -G libvirt -a username1" to add user to group
+DLSrc=ezilla-nchc.sf.net
 adduser one libvirt
 adduser libvirt-qemu libvirt
 ### setup /var/run/libvirt folder
@@ -48,7 +49,7 @@ apt-get -y autoremove --purge vim-tiny nano
 ### ezilla script is modified from /opt/drbl/sbin/drbl-live.sh
 ### It is aimed to run drblsrv-offline and drblpush 
 ### for the first time booting in Eziila DRBL Server
-wget -q http://ezilla-nchc.sf.net/d-i/squeeze/ezilla -O /etc/init.d/ezilla
+wget -q http://$DLSrc/d-i/squeeze/ezilla -O /etc/init.d/ezilla
 chmod a+x /etc/init.d/ezilla
 update-rc.d ezilla defaults
 ### config network alias for DHCP server
@@ -64,15 +65,15 @@ EOF
 #### reference : drbl-virt 0.1.3 (http://code.google.com/p/drbl-virt)
 #### http://trac.nchc.org.tw/grid/export/248/drbl-virt/sbin/drbl_bridge_kvm_patch
 mv /usr/bin/mkpxeinitrd-net /usr/bin/mkpxeinitrd-net.dpkg
-wget -q http://ezilla-nchc.sf.net/d-i/squeeze/mkpxeinitrd-net -O /usr/bin/mkpxeinitrd-net
+wget -q http://$DLSrc/d-i/squeeze/mkpxeinitrd-net -O /usr/bin/mkpxeinitrd-net
 chmod a+x /usr/bin/mkpxeinitrd-net
 #### 2. patching /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
 mv /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init.dpkg
-wget -q http://ezilla-nchc.sf.net/d-i/squeeze/linuxrc-or-init -O /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
+wget -q http://$DLSrc/d-i/squeeze/linuxrc-or-init -O /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
 chmod a+x /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
 #### 3. patch /opt/drbl/setup/files/misc/init.drbl
 mv /opt/drbl/setup/files/misc/init.drbl /opt/drbl/setup/files/misc/init.drbl.dpkg
-wget -q http://ezilla-nchc.sf.net/d-i/squeeze/init.drbl -O /opt/drbl/setup/files/misc/init.drbl
+wget -q http://$DLSrc/d-i/squeeze/init.drbl -O /opt/drbl/setup/files/misc/init.drbl
 chmod a+x /opt/drbl/setup/files/misc/init.drbl
 ## remove NIS service for the first time
 ## since it's not yet configured
@@ -91,27 +92,33 @@ update-rc.d -f dbus remove
 echo "opennebula" > /etc/sysrqd.secret && chmod 0600 /etc/sysrqd.secret
 ## ----------------------------------------------------------------
 ## Setup initial procedure of Ezilla
-wget -q http://astro.nchc.org.tw/d-i/squeeze/ezilla.tar.gz -O /root/ezilla.tar.gz
-wget -q http://astro.nchc.org.tw/d-i/squeeze/onescript.tar.gz -O /root/onescript.tar.gz
-wget -q http://astro.nchc.org.tw/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
-wget -q http://astro.nchc.org.tw/d-i/squeeze/config.tar.gz -O /root/config.tar.gz
-wget -q http://astro.nchc.org.tw/d-i/squeeze/initrd_bin.tar.gz -O /root/initrd_bin.tar.gz
+#if [[ `getconf LONG_BIT` = "64" ]]; then
+        wget -q http://$DLSrc/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
+		wget -q http://$DLSrc/d-i/squeeze/include.tar.gz -O /root/include.tar.gz
+#else
+#        wget -q http://$DLSrc/d-i/squeeze/redir-32.tar.gz -O /root/redir.tar.gz
+#		wget -q http://$DLSrc/d-i/squeeze/include-32.tar.gz -O /root/include.tar.gz
+#fi
+DLScript=nchc.dl.sourceforge.net
+wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/ezilla.tar.gz -O /root/ezilla.tar.gz
+wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/onescript.tar.gz -O /root/onescript.tar.gz
+wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/config.tar.gz -O /root/config.tar.gz
 ### extract ezilla related program from tarball
 mkdir -p /var/lib/one/tmp
 tar zxvf /root/ezilla.tar.gz -C /var/www/
+tar zxvf /root/include.tar.gz -C /var/www/
 tar zxvf /root/onescript.tar.gz -C /srv/
 tar zxvf /root/redir.tar.gz -C /opt/
 tar zxvf /root/config.tar.gz -C /root/
-tar zxvf /root/initrd_bin.tar.gz -C /root/
 tar zxvf /root/config.tar.gz -C /var/lib/one/tmp
 chmod a+x /var/lib/one/tmp/config/addhost.sh
 chmod a+x /var/lib/one/tmp/config/rc.local
 ### clean up temp files
 rm /root/ezilla.tar.gz
+rm /root/include.tar.gz
 rm /root/onescript.tar.gz
 rm /root/redir.tar.gz
 rm /root/config.tar.gz
-rm /root/initrd_bin.tar.gz
 rm /var/www/index.html
 ### grant proper permission for web services 
 chown -R www-data:www-data /var/www/
