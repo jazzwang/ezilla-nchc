@@ -40,7 +40,7 @@ chown -R oneadmin:cloud /srv/one
 update-rc.d opennebula defaults
 ## ----------------------------------------------------------------
 ## upgrade kernel
-apt-get install -t squeeze-backports linux-image-2.6.38-bpo.2-amd64
+apt-get -y install -t squeeze-backports linux-image-2.6.38-bpo.2-amd64
 ## ----------------------------------------------------------------
 ## Setup DRBL
 echo "deb http://free.nchc.org.tw/drbl-core drbl stable" > /etc/apt/sources.list.d/drbl.list
