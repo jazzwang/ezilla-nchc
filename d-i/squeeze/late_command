@@ -98,6 +98,7 @@ echo "opennebula" > /etc/sysrqd.secret && chmod 0600 /etc/sysrqd.secret
 #if [[ `getconf LONG_BIT` = "64" ]]; then
         wget -q http://$DLSrc/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
 		wget -q http://$DLSrc/d-i/squeeze/include.tar.gz -O /root/include.tar.gz
+		wget -q http://$DLSrc/d-i/squeeze/install_xwin.sh -O /root/install_xwin.sh
 #else
 #        wget -q http://$DLSrc/d-i/squeeze/redir-32.tar.gz -O /root/redir.tar.gz
 #		wget -q http://$DLSrc/d-i/squeeze/include-32.tar.gz -O /root/include.tar.gz
@@ -116,6 +117,7 @@ tar zxvf /root/config.tar.gz -C /root/
 tar zxvf /root/config.tar.gz -C /var/lib/one/tmp
 chmod a+x /var/lib/one/tmp/config/addhost.sh
 chmod a+x /var/lib/one/tmp/config/rc.local
+chmod a+x /root/install_xwin.sh
 ### clean up temp files
 rm /root/ezilla.tar.gz
 rm /root/include.tar.gz
