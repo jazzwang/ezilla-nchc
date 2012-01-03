@@ -99,10 +99,9 @@ echo "opennebula" > /etc/sysrqd.secret && chmod 0600 /etc/sysrqd.secret
 #        wget -q http://$DLSrc/d-i/squeeze/redir-32.tar.gz -O /root/redir.tar.gz
 #		wget -q http://$DLSrc/d-i/squeeze/include-32.tar.gz -O /root/include.tar.gz
 #fi
-DLScript=nchc.dl.sourceforge.net
-wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/ezilla.tar.gz -O /root/ezilla.tar.gz
-wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/onescript.tar.gz -O /root/onescript.tar.gz
-wget -q http://$DLScript/project/ezilla-nchc/Ezilla_Fast_Installer_Debian/config.tar.gz -O /root/config.tar.gz
+wget -q http://sourceforge.net/projects/ezilla-nchc/files/Ezilla_Fast_Installer_Debian/ezilla.tar.gz/download -O /root/ezilla.tar.gz
+wget -q http://sourceforge.net/projects/ezilla-nchc/files/Ezilla_Fast_Installer_Debian/onescript.tar.gz/download -O /root/onescript.tar.gz
+wget -q http://sourceforge.net/projects/ezilla-nchc/files/Ezilla_Fast_Installer_Debian/config.tar.gz/download -O /root/config.tar.gz
 ### extract ezilla related program from tarball
 mkdir -p /var/lib/one/tmp
 tar zxvf /root/ezilla.tar.gz -C /var/www/
