@@ -1,0 +1,5 @@
+[drbl]
+name=This is DRBL site
+baseurl=http://free.nchc.org.tw/drbl-core/x86_64/RPMS.drbl-unstable/
+enable=1
+gpgcheck=0
