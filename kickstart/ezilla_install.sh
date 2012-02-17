@@ -1,4 +1,7 @@
 #!/bin/bash
+# Author: Chang-Hsing Wu <hsing _at_ nchc narl org tw>
+#         Serena Yi-Lun Pan <serenapan _at_ nchc narl org tw>
+# License: GPL
 # Program:
 #  This Ezilla project disk version install 
 # History:
