@@ -78,6 +78,10 @@ chmod a+x /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
 mv /opt/drbl/setup/files/misc/init.drbl /opt/drbl/setup/files/misc/init.drbl.dpkg
 wget -q http://$DLSrc/d-i/squeeze/init.drbl -O /opt/drbl/setup/files/misc/init.drbl
 chmod a+x /opt/drbl/setup/files/misc/init.drbl
+#### 4. patch /opt/drbl/sbin/ocs-live-netcfg
+mv /opt/drbl/sbin/ocs-live-netcfg /opt/drbl/sbin/ocs-live-netcfg.dpkg
+wget -q http://$DLSrc/d-i/squeeze/ocs-live-netcfg -O /opt/drbl/sbin/ocs-live-netcfg
+chmod a+x /opt/drbl/sbin/ocs-live-netcfg
 ## remove NIS service for the first time
 ## since it's not yet configured
 update-rc.d -f nis remove
