@@ -1,0 +1,13 @@
+NAME = "public"
+TYPE = RANGED
+PUBLIC = YES
+BRIDGE = br0
+
+NETWORK_SIZE    = C
+NETWORK_ADDRESS = 10.0.1.0
+
+#Custom Attributes to be used in Context
+GATEWAY = 10.0.0.254
+DNS     = 140.110.4.1
+
+LOAD_BALANCER = 10.0.1.254

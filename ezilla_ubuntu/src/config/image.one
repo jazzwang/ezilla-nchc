@@ -1,0 +1,7 @@
+NAME          = "ttylinux"
+PATH          = /srv/one/vmimage/ttylinux.img
+PUBLIC        = YES
+DESCRIPTION   = "a small GNU/Linux system available for several CPU architectures."
+BUS           = ide
+OSTYPE        = "ttylinux"
+FILETYPE      = "raw"
