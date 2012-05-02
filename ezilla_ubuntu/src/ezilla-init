@@ -1,0 +1,150 @@
+#!/bin/bash
+DLSrc=ezilla-nchc.sf.net
+## ----------------------------------------------------------------
+##upgrade kernel
+add-apt-repository -y ppa:kernel-ppa/ppa
+add-apt-repository -y ppa:dnjl/virtualization
+echo "deb http://ppa.launchpad.net/dnjl/virtualization/ubuntu lucid main" >> /etc/apt/sources.list
+echo "deb-src http://ppa.launchpad.net/dnjl/virtualization/ubuntu lucid main" >> /etc/apt/sources.list
+echo "deb http://ppa.launchpad.net/dnjl/network/ubuntu lucid main" >> /etc/apt/sources.list
+echo "deb-src http://ppa.launchpad.net/dnjl/network/ubuntu lucid main" >> /etc/apt/sources.list
+### upgrade kvm & libvirt
+apt-get -y update
+apt-get -y upgrade
+apt-get -y remove kvm qemu-kvm libvirt-bin iptables
+apt-get -y install kvm qemu-kvm libvirt-bin iptables
+#apt-get -y install linux-image-3.0.0-17-generic linux-headers-3.0.0-17-generic
+## ----------------------------------------------------------------
+## Setup Libvirt
+### configure libvirtd.conf
+sed -i -e 's/unix_sock_group = \"libvirtd\"/unix_sock_group = \"oneadmin\"/g' -e 's/#unix_sock_rw_perms/unix_sock_rw_perms/g' -e 's/#auth_unix_ro/auth_unix_ro/g' -e 's/#auth_unix_rw/auth_unix_rw/g' /etc/libvirt/libvirtd.conf
+sed -i -e 's/user = \"root\"/user = \"oneadmin\"/g' -e 's/group = \"root\"/group = \"oneadmin\"/g'  -e 's/#dynamic_ownership = 1/dynamic_ownership = 0/g' /etc/libvirt/qemu.conf
+### remove virbr0
+rm /etc/libvirt/qemu/networks/autostart/default.xml
+rm /etc/libvirt/qemu/networks/default.xml
+### setup HVM modules
+echo "kvm" >> /etc/modules
+echo "kvm_amd" >> /etc/modules
+echo "kvm_intel" >> /etc/modules
+## ----------------------------------------------------------------
+## Setup OpenNebula
+##
+### create oneadmin home , log , image pool for opennebula
+dpkg -i /root/opennebula_2.2-1_amd64.deb
+mkdir -p /var/lib/one/.one
+mkdir -p /var/log/one
+mkdir -p /srv/one
+chown -R oneadmin:oneadmin /srv/one
+chown -R oneadmin:oneadmin /var/lib/one
+chown -R oneadmin:oneadmin /var/log/one
+usermod -a -G libvirtd oneadmin
+usermod -a -G kvm oneadmin
+usermod -a -G oneadmin libvirtd
+usermod -a -G oneadmin kvm
+### Configure ONE_AUTH
+echo "oneadmin:opennebulaadmin" > /var/lib/one/.one/one_auth
+chown oneadmin:oneadmin /var/lib/one/.one/one_auth
+## ----------------------------------------------------------------
+## Setup SSH client Global variable
+echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+## Setup SSH private key for user 'one'
+su one -s /bin/bash -c "ssh-keygen -t rsa -f /home/one/.ssh/id_rsa -q -N \"\""
+### ssh-copy-host for user 'one'
+#### use -p to preserve permission : (X) root:root -> (O) one:one
+cp -p -f /home/one/.ssh/id_rsa.pub /home/one/.ssh/authorized_keys
+### ssh-copy-host for user 'oneadmin'
+cp -p -f /var/lib/one/.ssh/id_rsa.pub /var/lib/one/.ssh/authorized_keys
+### add services to DRBL Server
+update-rc.d opennebula defaults
+## ----------------------------------------------------------------
+### setup vim and untar patch
+apt-get -y autoremove --purge vim-tiny nano
+tar zxvf /root/patch.tar.gz -C /root/
+## ----------------------------------------------------------------
+## Setup initialization procedure of DRBL (drblsrv-offline and drbl-live.sh)
+### ezilla script is modified from /opt/drbl/sbin/drbl-live.sh
+### It is aimed to run drblsrv-offline and drblpush 
+### for the first time booting in Eziila DRBL Server
+cp -p -f /root/patch/ezilla /etc/init.d/ezilla
+chmod a+x /etc/init.d/ezilla
+update-rc.d ezilla defaults
+mv /etc/rc2.d/S20ezilla /etc/rc2.d/S40ezilla
+### config network alias for DHCP server
+cat >> /etc/network/interfaces << EOF
+## setup eth0:1 as ethernet alias
+auto eth0:1
+iface eth0:1 inet static
+address 10.0.0.254
+netmask 255.0.0.0
+EOF
+## ----------------------------------------------------------------
+### Adding support of KVM physical network sharing bridge
+#### 1. patching /usr/bin/mkpxeinitrd-net
+#### reference : drbl-virt 0.1.3 (http://code.google.com/p/drbl-virt)
+#### http://trac.nchc.org.tw/grid/export/248/drbl-virt/sbin/drbl_bridge_kvm_patch
+mv /usr/bin/mkpxeinitrd-net /usr/bin/mkpxeinitrd-net.dpkg
+cp /root/patch/mkpxeinitrd-net /usr/bin/mkpxeinitrd-net
+chmod a+x /usr/bin/mkpxeinitrd-net
+#### 2. patching /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
+mv /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init.dpkg
+cp /root/patch/linuxrc-or-init /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
+chmod a+x /usr/lib/mkpxeinitrd-net/initrd-skel/linuxrc-or-init
+#### 3. patch /opt/drbl/setup/files/misc/init.drbl
+mv /opt/drbl/setup/files/misc/init.drbl /opt/drbl/setup/files/misc/init.drbl.dpkg
+cp /root/patch/init.drbl /opt/drbl/setup/files/misc/init.drbl
+chmod a+x /opt/drbl/setup/files/misc/init.drbl
+#### 4.patch multi-nic bug
+mv /opt/drbl/sbin/ocs-live-netcfg /opt/drbl/sbin/ocs-live-netcfg.dpkg
+cp /root/patch/ocs-live-netcfg /opt/drbl/sbin/ocs-live-netcfg
+chmod a+x /opt/drbl/sbin/ocs-live-netcfg
+## remove NIS service for the first time
+## since it's not yet configured
+update-rc.d -f nis disable 2345
+## remove libvirt-bin service for the first time
+## since it's not yet configured and only needed by DRBL client
+update-rc.d -f libvirt-bin disable 2345
+## remove DHCP and TFTP Server service for the first time 
+## since we will not need it and it's not yet configured
+update-rc.d -f dhcp3-server disable 2345
+update-rc.d -f tftpd-hpa disable 2345
+## disable exim4 service that we don't need now
+update-rc.d -f exim4 disable 2345
+update-rc.d -f dbus disable 2345
+## add sysrqd to default service
+#echo "opennebula" > /etc/sysrqd.secret && chmod 0600 /etc/sysrqd.secret
+## ----------------------------------------------------------------
+## Setup initial procedure of Ezilla
+#if [[ `getconf LONG_BIT` = "64" ]]; then
+wget -q http://$DLSrc/d-i/squeeze/redir.tar.gz -O /root/redir.tar.gz
+wget -q http://$DLSrc/d-i/squeeze/include.tar.gz -O /root/include.tar.gz
+#else
+#        wget -q http://$DLSrc/d-i/squeeze/redir-32.tar.gz -O /root/redir.tar.gz
+#		wget -q http://$DLSrc/d-i/squeeze/include-32.tar.gz -O /root/include.tar.gz
+#fi
+wget -q http://sourceforge.net/projects/ezilla-nchc/files/Ezilla_Fast_Installer_Debian/ezilla.tar.gz/download -O /root/ezilla.tar.gz
+wget -q http://sourceforge.net/projects/ezilla-nchc/files/Ezilla_Fast_Installer_Debian/onescript.tar.gz/download -O /root/onescript.tar.gz
+### extract ezilla related program from tarball
+tar zxvf /root/patch.tar.gz -C /root/
+mkdir -p /var/lib/one/tmp/config
+cp /root/config/* /var/lib/one/tmp/config/
+cp /root/patch/ezilla.png /opt/drbl/image/drblwp.png
+chmod a+x /var/lib/one/tmp/config/addhost.sh
+tar zxvf /root/ezilla.tar.gz -C /var/www/
+tar zxvf /root/include.tar.gz -C /var/www/
+tar zxvf /root/onescript.tar.gz -C /srv/
+tar zxvf /root/redir.tar.gz -C /opt/
+### clean up temp files
+rm /root/ezilla.tar.gz
+rm /root/patch.tar.gz
+rm /root/opennebula_2.2-1_amd64.deb
+rm /root/include.tar.gz
+rm /root/onescript.tar.gz
+rm /root/redir.tar.gz
+rm /var/www/index.html
+### grant proper permission for web services and opennebula dir
+chown -R oneadmin:oneadmin /var/lib/one
+chown -R www-data:www-data /var/www/
+### setup /var/run/libvirt folder
+mkdir -p /var/run/libvirt
+chown oneadmin:oneadmin /var/run/libvirt
+chmod g+w /var/run/libvirt
